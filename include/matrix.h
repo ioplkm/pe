@@ -2,6 +2,7 @@
 #define MATRIX_H
 
 #include "vector.h"
+#include "quaternion.h"
 
 typedef struct {
   double data[9];
@@ -142,8 +143,8 @@ Matrix33 m33FromQ(Quaternion q) {
                     1 - (2*q.i*q.i + 2*q.j*q.j)};
 }
 
-Matrix33 m33FromQV(Quaternion q, Vector v) {
-  return (Matrix33){1 - (2*q.j*q.j + 2*q.k*q.k),
+Matrix34 m34FromQV(Quaternion q, Vector v) {
+  return (Matrix34){1 - (2*q.j*q.j + 2*q.k*q.k),
                     2*q.i*q.j + 2*q.k*q.r,
                     2*q.i*q.k - 2*q.j*q.r,
                     v.x,
