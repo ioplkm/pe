@@ -6,6 +6,7 @@
 #include "include/spring.h"
 #include "include/cable.h"
 #include "include/matrix.h"
+#include "include/rigidbody.h"
 
 #include "include/fb.h"
 
