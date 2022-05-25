@@ -5,11 +5,12 @@
 #include "matrix.h"
 
 typedef struct {
-  Vector p, v, r;
+  Vector p, v, r, a, f, t;
   Quaternion o;
   double inverseMass;
-  //Matrix34 transformMatrix;
   Matrix33 inverseInertiaTensor;
+
+  Matrix34 transformMatrix;
 } Rigidbody;
 
 Matrix34 calcTransformMatrix(Vector p, Quaternion o) {
@@ -35,6 +36,16 @@ Matrix33 calcInverseInertiaTensorWorld(Matrix33 iit, Matrix34 transform) {
                     t52*transform.data[0] + t57*transform.data[1] + t62*transform.data[2],
                     t52*transform.data[4] + t57*transform.data[5] + t62*transform.data[6],
                     t52*transform.data[8] + t57*transform.data[9] + t62*transform.data[10]};
+}
+
+void updateRigidbody(Rigidbody *pRB, double dTime) {
+  pRB->f = (Vector){0, 0, 0};
+  pRB->t = (Vector){0, 0, 0};
+}
+
+void applyForceAtPoint(Rigidbody *pRB, Vector f, Vector p) {
+  pRB->f = vAdd(pRB->f, f);
+  pRB->t = vAdd(pRB->t, vectorProd(vSub(p, pRB->p), f));
 }
 
 #endif
