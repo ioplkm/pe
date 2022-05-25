@@ -8,6 +8,10 @@ typedef struct {
   double x, y, z;
 } Vector;
 
+void printV(Vector v) {
+  printf("%7.2f %7.2f\n", v.x, v.y);
+}
+
 Vector vAdd(Vector v1, Vector v2) {
   return (Vector){v1.x + v2.x, v1.y + v2.y, v1.z + v2.z};
 }

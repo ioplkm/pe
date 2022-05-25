@@ -16,6 +16,8 @@ void updateRigidbodySpringForces(RigidbodySpring *pRBS) {
   Vector lws = localToWorld(pRBS->p1, pRBS->pRB1->transformMatrix);
   Vector ows = localToWorld(pRBS->p2, pRBS->pRB2->transformMatrix);
   Vector force = vSub(ows, lws);
+  printV(ows);
+  //printV(force);
 
   Vector springForce = vMult(vNormalize(force), fabs(vLength(force) - pRBS->l) * pRBS->k);
 

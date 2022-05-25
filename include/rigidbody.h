@@ -38,14 +38,23 @@ Matrix33 calcInverseInertiaTensorWorld(Matrix33 iit, Matrix34 transform) {
                     t52*transform.data[8] + t57*transform.data[9] + t62*transform.data[10]};
 }
 
-void updateRigidbody(Rigidbody *pRB, double dTime) {
-  pRB->f = (Vector){0, 0, 0};
-  pRB->t = (Vector){0, 0, 0};
-}
-
 void applyForceAtPoint(Rigidbody *pRB, Vector f, Vector p) {
   pRB->f = vAdd(pRB->f, f);
   pRB->t = vAdd(pRB->t, vectorProd(vSub(p, pRB->p), f));
+}
+
+void updateRigidbody(Rigidbody *pRB, double dTime) {
+  Vector aRes = vAdd(pRB->a, vMult(pRB->f, pRB->inverseMass));
+  Matrix33 iitw = calcInverseInertiaTensorWorld(pRB->inverseInertiaTensor, pRB->transformMatrix);
+  Vector aaRes = m33vMult(iitw, pRB->t);
+
+  pRB->v = vAdd(pRB->v, vMult(aRes, dTime));
+  pRB->r = vAdd(pRB->r, vMult(aaRes, dTime));
+  pRB->p = vAdd(pRB->p, vMult(pRB->v, dTime));
+  pRB->o = qNorm(qvAdd(pRB->o, vMult(pRB->r, dTime)));
+
+  pRB->f = (Vector){0, 0, 0};
+  pRB->t = (Vector){0, 0, 0};
 }
 
 #endif
