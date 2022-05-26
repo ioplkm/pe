@@ -15,10 +15,16 @@
 uint32_t *buffer;
 struct fb_var_screeninfo info;
 
+#include "vector.h"
+
 void drawPoint(uint32_t x, uint32_t y, uint32_t color) {
   for (uint32_t i = x - 3; i < x + 3; i++)
     for (uint32_t j = y - 3; j < y + 3; j++)
       buffer[j * info.xres + i] = color;
+}
+
+void drawV(Vector v, uint32_t color) {
+   drawPoint((int)(v.x * 10) + 960, (int)(-v.y * 10) + 540, color);
 }
 
 void fbInit() {

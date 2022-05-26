@@ -9,7 +9,7 @@ typedef struct {
 } Vector;
 
 void printV(Vector v) {
-  printf("%7.2f %7.2f\n", v.x, v.y);
+  printf("x:%7.2f y:%7.2f z:%7.2f\n", v.x, v.y, v.z);
 }
 
 Vector vAdd(Vector v1, Vector v2) {

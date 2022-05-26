@@ -28,21 +28,28 @@ int main() {
 
   //pointCollisions = (PointCollision*)malloc(sizeof(PointCollision) * 99);
 
-  Matrix33 iit = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  Matrix33 cubeiit = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   Matrix34 null34 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  Rigidbody rb = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, -G, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0, 1}, 1, iit, null34};
-  Rigidbody rb2 = {{10, 10, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0, 1}, 0, iit, null34};
-  RigidbodySpring s = {{0, 10, 0}, {1, 1, 0}, &rb, &rb2, 1, 10};
+  Rigidbody rb = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, -G, 0}, {0, 0, 0}, {0, 0, 0}, {1, 0, 0, 0}, 1, cubeiit, null34};
+  Rigidbody rb2 = {{10, 10, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {1, 0, 0, 0}, 0, cubeiit, null34};
+  RigidbodySpring s = {{2, 2, 0}, {2, 2, 0}, &rb, &rb2, 1, 10};
   for (int i = 0; i < 64*10000; i++) {
     rb.transformMatrix = calcTransformMatrix(rb.p, rb.o);
     rb2.transformMatrix = calcTransformMatrix(rb2.p, rb2.o);
     updateRigidbodySpringForces(&s);
     updateRigidbody(&rb, dTime);
     updateRigidbody(&rb2, dTime);
-    drawPoint((int)(rb.p.x * 10) + 960, (int)(-rb.p.y * 10) + 540, red);
-    drawPoint((int)(rb2.p.x * 10) + 960, (int)(-rb2.p.y * 10) + 540, yellow);
+
+    Vector rbp = localToWorld(s.p1, rb.transformMatrix);
+    Vector rbp2 = localToWorld(s.p2, rb2.transformMatrix);
+    drawV(rb.p, red);
+    drawV(rb2.p, yellow);
+    drawV(rbp, green);
+    drawV(rbp2, blue);
     usleep((int)(1000000*dTime));
-    drawPoint((int)(rb.p.x * 10) + 960, (int)(-rb.p.y * 10) + 540, black);
-    drawPoint((int)(rb2.p.x * 10) + 960, (int)(-rb2.p.y * 10) + 540, black);
+    drawV(rb.p, black);
+    drawV(rb2.p, black);
+    drawV(rbp, black);
+    drawV(rbp2, black);
   }
 }

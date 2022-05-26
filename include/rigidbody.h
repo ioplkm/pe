@@ -40,7 +40,7 @@ Matrix33 calcInverseInertiaTensorWorld(Matrix33 iit, Matrix34 transform) {
 
 void applyForceAtPoint(Rigidbody *pRB, Vector f, Vector p) {
   pRB->f = vAdd(pRB->f, f);
-  pRB->t = vAdd(pRB->t, vectorProd(vSub(p, pRB->p), f));
+  pRB->t = vSub(pRB->t, vectorProd(vSub(p, pRB->p), f));
 }
 
 void updateRigidbody(Rigidbody *pRB, double dTime) {
@@ -48,8 +48,8 @@ void updateRigidbody(Rigidbody *pRB, double dTime) {
   Matrix33 iitw = calcInverseInertiaTensorWorld(pRB->inverseInertiaTensor, pRB->transformMatrix);
   Vector aaRes = m33vMult(iitw, pRB->t);
 
-  pRB->v = vAdd(pRB->v, vMult(aRes, dTime));
-  pRB->r = vAdd(pRB->r, vMult(aaRes, dTime));
+  pRB->v = vMult(   vAdd(pRB->v, vMult(aRes, dTime))   ,pow(0.99, dTime));
+  pRB->r = vMult(   vAdd(pRB->r, vMult(aaRes, dTime))   ,pow(0.99, dTime));
   pRB->p = vAdd(pRB->p, vMult(pRB->v, dTime));
   pRB->o = qNorm(qvAdd(pRB->o, vMult(pRB->r, dTime)));
 
