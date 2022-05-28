@@ -160,9 +160,9 @@ Matrix34 m34FromQV(Quaternion q, Vector v) {
                     v.z};
 }
 
-Vector localToWorld(Vector local, Matrix34 trans) {
+/*Vector localToWorld(Vector local, Matrix34 trans) {
   return m34vMult(trans, local);
-}
+}*/
 
 Vector worldToLocal(Vector world, Matrix34 trans) {
   Vector t = {world.x - trans.data[3], world.y - trans.data[7], world.z - trans.data[11]};

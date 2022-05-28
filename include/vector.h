@@ -58,4 +58,8 @@ double vDist(Vector v1, Vector v2) {
   return vLength(vSub(v1, v2));
 } 
 
+double vDist2(Vector v1, Vector v2) {
+  return vLength2(vSub(v1, v2));
+} 
+
 #endif

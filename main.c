@@ -3,12 +3,14 @@
 
 #include <unistd.h>
 
-#include "include/spring.h"
+#include "include/pointspring.h"
 #include "include/cable.h"
 
 #include "include/matrix.h"
 #include "include/rigidbody.h"
-#include "include/rigidbodyspring.h"
+#include "include/spring.h"
+
+#include "include/broadcollision.h"
 
 #include "include/fb.h"
 
@@ -34,14 +36,14 @@ int main() {
   Rigidbody rb2 = {{10, 10, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {1, 0, 0, 0}, 0, cubeiit, null34};
   RigidbodySpring s = {{2, 2, 0}, {2, 2, 0}, &rb, &rb2, 1, 10};
   for (int i = 0; i < 64*10000; i++) {
-    rb.transformMatrix = calcTransformMatrix(rb.p, rb.o);
-    rb2.transformMatrix = calcTransformMatrix(rb2.p, rb2.o);
+    rb.transformMatrix = m34FromQV(rb.o, rb.p);
+    rb2.transformMatrix = m34FromQV(rb2.o, rb2.p);
     updateRigidbodySpringForces(&s);
     updateRigidbody(&rb, dTime);
     updateRigidbody(&rb2, dTime);
 
-    Vector rbp = localToWorld(s.p1, rb.transformMatrix);
-    Vector rbp2 = localToWorld(s.p2, rb2.transformMatrix);
+    Vector rbp = m34vMult(rb.transformMatrix, s.p1);
+    Vector rbp2 = m34vMult(rb2.transformMatrix, s.p2);
     drawV(rb.p, red);
     drawV(rb2.p, yellow);
     drawV(rbp, green);

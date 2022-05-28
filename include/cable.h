@@ -1,7 +1,7 @@
 #ifndef CABLE_H
 #define CABLE_H
 
-#include "collision.h"
+#include "pointcollision.h"
 
 typedef struct {
   Point *pPoint1, *pPoint2;

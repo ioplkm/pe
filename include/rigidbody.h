@@ -13,9 +13,9 @@ typedef struct {
   Matrix34 transformMatrix;
 } Rigidbody;
 
-Matrix34 calcTransformMatrix(Vector p, Quaternion o) {
+/*Matrix34 calcTransformMatrix(Vector p, Quaternion o) {
   return m34FromQV(o, p);
-}
+}*/
 
 Matrix33 calcInverseInertiaTensorWorld(Matrix33 iit, Matrix34 transform) {
   double t4 = transform.data[0]*iit.data[0] + transform.data[1]*iit.data[3] + transform.data[2]*iit.data[6];

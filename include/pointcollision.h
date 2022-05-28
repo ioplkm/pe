@@ -1,5 +1,5 @@
-#ifndef COLLISION_H
-#define COLLISION_H
+#ifndef POINTCOLLISION_H
+#define POINTCOLLISION_H
 
 #include <float.h>
 
