@@ -4,13 +4,14 @@
 #include <unistd.h>
 
 #include "include/pointspring.h"
-#include "include/cable.h"
+#include "include/pointcable.h"
 
 #include "include/matrix.h"
 #include "include/rigidbody.h"
 #include "include/spring.h"
 
 #include "include/broadcollision.h"
+#include "include/narrowcollision.h"
 
 #include "include/fb.h"
 
