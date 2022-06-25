@@ -17,7 +17,7 @@ typedef struct {
 } Sphere;
 
 typedef struct {
-  RigidBody *pRB;
+  Rigidbody *pRB;
   Matrix34 offset;
   Vector normal;
   double planeOffset;
@@ -44,8 +44,24 @@ void SphereSphereCollision(Sphere *pS1, Sphere *pS2) {
   collisionC++;
 }
 
+void SphereHalfSpaceCollision(Sphere *pS, Plane *pP) {
+  Vector sp = pS->pRB->p;
+  double distance = scalarProd(pP->normal, sp) - pS->r - pP->planeOffset;
+  
+  collisions[collisionC].p = vSub(sp, vMult(pP->normal, distance + pS->r));
+  collisions[collisionC].normal = pP->normal;
+  collisions[collisionC].penetration = -distance;
+  collisionC++;
+}
+
 void SpherePlaneCollision(Sphere *pS, Plane *pP) {
   Vector sp = pS->pRB->p;
+  double distance = scalarProd(pP->normal, sp) - pP->planeOffset;
+
+  collisions[collisionC].p = vSub(sp, vMult(pP->normal, distance + pS->r));
+  collisions[collisionC].normal = distance < 0 ? vMult(pP->normal, -1) : pP->normal;
+  collisions[collisionC].penetration = distance < 0 ? distance + pS->r : -distance + pS->r;
+  collisionC++;
 }
 
 #endif
