@@ -24,6 +24,12 @@ typedef struct {
 } CollisionPlane;
 
 typedef struct {
+  Rigidbody *pRB;
+  Matrix34 offset;
+  Vector halfSize;
+} CollisionBox;
+
+typedef struct {
   Vector p;
   Vector normal;
   double penetration;
@@ -62,6 +68,21 @@ void SpherePlaneCollision(CollisionSphere *pCS, CollisionPlane *pCP) {
   collisions[collisionC].normal = distance < 0 ? vMult(pCP->normal, -1) : pCP->normal;
   collisions[collisionC].penetration = distance < 0 ? distance + pCS->r : -distance + pCS->r;
   collisionC++;
+}
+
+void BoxHalfSpaceCollision(CollisionBox *pCB, CollisionPlane *pCP) {
+  for (int i = 0; i < 8; i++) {
+    Vector p = {i & 1 ? -pCB->halfSize.x : pCB->halfSize.x,
+                i & 2 ? -pCB->halfSize.y : pCB->halfSize.y,
+                i & 4 ? -pCB->halfSize.z : pCB->halfSize.z};
+    p = m34vMult(pCB->pRB->transformMatrix, p);
+    double dist = scalarProd(p, pCP->normal);
+    if (dist <= pCP->planeOffset) {
+      collisions[collisionC].p = vAdd(vMult(pCP->normal, dist - pCP->planeOffset), p);
+      collisions[collisionC].normal = pCP->normal;
+      collisions[collisionC].penetration = pCP->planeOffset - dist;
+    }
+  }
 }
 
 #endif
