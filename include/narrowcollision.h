@@ -85,4 +85,20 @@ void BoxHalfSpaceCollision(CollisionBox *pCB, CollisionPlane *pCP) {
   }
 }
 
+void BoxSphereCollision(CollisionBox *pCB, CollisionSphere *pCS) {
+  Vector relSphereCenter = worldToLocal(pCS->pRB->p, pCB->pRB->transformMatrix);
+  Vector closestP = {relSphereCenter.x > pCB->halfSize.x ? pCB->halfSize.x : 
+                       relSphereCenter.x < -pCB->halfSize.x ? -pCB->halfSize.x : relSphereCenter.x,
+                     relSphereCenter.y > pCB->halfSize.y ? pCB->halfSize.y : 
+                       relSphereCenter.y < -pCB->halfSize.y ? -pCB->halfSize.y : relSphereCenter.y,
+                     relSphereCenter.z > pCB->halfSize.z ? pCB->halfSize.z : 
+                       relSphereCenter.z < -pCB->halfSize.z ? -pCB->halfSize.z : relSphereCenter.z};
+  double dist = vLength2(vSub(closestP, relSphereCenter));
+  Vector closestPWorld = m34vMult(pCB->pRB->transformMatrix, closestP);
+  collisions[collisionC].p = closestPWorld;
+  collisions[collisionC].normal = vNorm(vSub(closestPWorld, pCS->pRB->p));
+  collisions[collisionC].penetration = pCS->r - fabs(dist);
+  collisionC++;
+}
+
 #endif

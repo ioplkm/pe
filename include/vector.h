@@ -46,6 +46,10 @@ Vector vNormalize(Vector v) {
   return vMult(v, 1 / vLength(v));
 }
 
+Vector vNorm(Vector v) {
+  return vMult(v, 1 / vLength(v));
+}
+
 bool vIsZero(Vector v) {
   return !v.x && !v.y && !v.z;
 }
