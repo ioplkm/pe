@@ -66,4 +66,8 @@ double vDist2(Vector v1, Vector v2) {
   return vLength2(vSub(v1, v2));
 } 
 
+Vector vInv(Vector v) {
+  return (Vector){-v.x, -v.y, -v.z};
+}
+
 #endif

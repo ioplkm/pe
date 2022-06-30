@@ -122,38 +122,113 @@ double axisPenetration(CollisionBox *pB1, CollisionBox *pB2, Vector axis) {
 }
 
 void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2) {
-  Vector axis[15]; //to optimize later
+  Vector axes[15]; //to optimize later
   Vector b1x = getTransformRow(pB1->pRB->transformMatrix, 0);
   Vector b1y = getTransformRow(pB1->pRB->transformMatrix, 1);
   Vector b1z = getTransformRow(pB1->pRB->transformMatrix, 2);
   Vector b2x = getTransformRow(pB2->pRB->transformMatrix, 0);
   Vector b2y = getTransformRow(pB2->pRB->transformMatrix, 1);
   Vector b2z = getTransformRow(pB2->pRB->transformMatrix, 2);
-  axis[0] = b1x;
-  axis[1] = b1y;
-  axis[2] = b1z;
-  axis[3] = b2x;
-  axis[4] = b2y;
-  axis[5] = b2z;
-  axis[6] = vectorProd(b1x, b2x);
-  axis[7] = vectorProd(b1x, b2y);
-  axis[8] = vectorProd(b1x, b2z);
-  axis[9] = vectorProd(b1y, b2x);
-  axis[10] = vectorProd(b1y, b2y);
-  axis[11] = vectorProd(b1y, b2z);
-  axis[12] = vectorProd(b1z, b2x);
-  axis[13] = vectorProd(b1z, b2y);
-  axis[14] = vectorProd(b1z, b2z);
+  axes[0] = b1x;
+  axes[1] = b1y;
+  axes[2] = b1z;
+  axes[3] = b2x;
+  axes[4] = b2y;
+  axes[5] = b2z;
+  axes[6] = vectorProd(b1x, b2x);
+  axes[7] = vectorProd(b1x, b2y);
+  axes[8] = vectorProd(b1x, b2z);
+  axes[9] = vectorProd(b1y, b2x);
+  axes[10] = vectorProd(b1y, b2y);
+  axes[11] = vectorProd(b1y, b2z);
+  axes[12] = vectorProd(b1z, b2x);
+  axes[13] = vectorProd(b1z, b2y);
+  axes[14] = vectorProd(b1z, b2z);
 
+  Vector axis;
   double minPen = DBL_MAX;
+  int best;
   for (int i = 0; i < 15; i++) {
-    if (vIsZero(axis[i])) continue;
-    axis[i] = vNorm(axis[i]);
-    double pen = axisPenetration(pB1, pB2, axis[i]);
-    printf("%f\n", pen);
-    if (pen < minPen) minPen = pen;
+    axis = axes[i];
+    //if (vIsZero(axis)) continue;
+    if (vIsZero(axis)) {printf("drop\n"); continue;}
+    axis = vNorm(axis);
+    double pen = axisPenetration(pB1, pB2, axis);
+    printf("pen: %f\n", pen);
+    if (pen <= minPen) {
+      minPen = pen;
+      best = i;
+    }
   }
-  printf("%f\n", minPen);
+
+  printf("best: %d\n", best);
+
+  if (best < 3) {
+    Vector normal = getTransformRow(pB1->pRB->transformMatrix, best);
+    if (scalarProd(normal, vSub(pB2->pRB->p, pB1->pRB->p)) > 0) normal = vInv(normal);
+    Vector vertex = pB2->halfSize;
+    if (scalarProd(getTransformRow(pB2->pRB->transformMatrix, 0), normal) < 0) vertex.x *= -1;
+    if (scalarProd(getTransformRow(pB2->pRB->transformMatrix, 1), normal) < 0) vertex.y *= -1;
+    if (scalarProd(getTransformRow(pB2->pRB->transformMatrix, 2), normal) < 0) vertex.z *= -1;
+
+    collisions[collisionC].p = m34vMult(pB2->pRB->transformMatrix, vertex);
+    collisions[collisionC].normal = normal;
+    collisions[collisionC].penetration = minPen;
+  } else if (best < 6) {
+    best -= 3;
+    Vector normal = getTransformRow(pB2->pRB->transformMatrix, best);
+    if (scalarProd(normal, vSub(pB1->pRB->p, pB2->pRB->p)) > 0) normal = vInv(normal);
+    Vector vertex = pB1->halfSize;
+    if (scalarProd(getTransformRow(pB1->pRB->transformMatrix, 0), normal) < 0) vertex.x *= -1;
+    if (scalarProd(getTransformRow(pB1->pRB->transformMatrix, 1), normal) < 0) vertex.y *= -1;
+    if (scalarProd(getTransformRow(pB1->pRB->transformMatrix, 2), normal) < 0) vertex.z *= -1;
+
+    collisions[collisionC].p = m34vMult(pB1->pRB->transformMatrix, vertex);
+    collisions[collisionC].normal = normal;
+    collisions[collisionC].penetration = minPen;
+  } else {
+    best -= 6;
+    int oneAxisIndex = best / 3;
+    int twoAxisIndex = best % 3;
+    Vector oneAxis = getTransformRow(pB1->pRB->transformMatrix, oneAxisIndex);
+    Vector twoAxis = getTransformRow(pB2->pRB->transformMatrix, twoAxisIndex);
+    Vector axis = vectorProd(oneAxis, twoAxis);
+    axis = vNorm(axis);
+    if (scalarProd(axis, vSub(pB2->pRB->p, pB1->pRB->p)) > 0) axis = vInv(axis);
+
+    Vector ptOnEdge1 = pB1->halfSize;
+    if (oneAxisIndex == 0) ptOnEdge1.x = 0;
+    else if (scalarProd(getTransformRow(pB1->pRB->transformMatrix, 0), axis) > 0) ptOnEdge1.x = -ptOnEdge1.x;
+    if (oneAxisIndex == 1) ptOnEdge1.y = 0;
+    else if (scalarProd(getTransformRow(pB1->pRB->transformMatrix, 1), axis) > 0) ptOnEdge1.y = -ptOnEdge1.y;
+    if (oneAxisIndex == 2) ptOnEdge1.z = 0;
+    else if (scalarProd(getTransformRow(pB1->pRB->transformMatrix, 2), axis) > 0) ptOnEdge1.z = -ptOnEdge1.z;
+    ptOnEdge1 = m34vMult(pB1->pRB->transformMatrix, ptOnEdge1);
+
+    Vector ptOnEdge2 = pB2->halfSize;
+    if (twoAxisIndex == 0) ptOnEdge2.x = 0;
+    else if (scalarProd(getTransformRow(pB2->pRB->transformMatrix, 0), axis) < 0) ptOnEdge2.x = -ptOnEdge2.x;
+    if (twoAxisIndex == 1) ptOnEdge2.y = 0;
+    else if (scalarProd(getTransformRow(pB2->pRB->transformMatrix, 1), axis) < 0) ptOnEdge2.y = -ptOnEdge2.y;
+    if (twoAxisIndex == 2) ptOnEdge2.z = 0;
+    else if (scalarProd(getTransformRow(pB2->pRB->transformMatrix, 2), axis) < 0) ptOnEdge2.z = -ptOnEdge2.z;
+    ptOnEdge2 = m34vMult(pB2->pRB->transformMatrix, ptOnEdge2);
+
+    Vector p2p1 = vSub(ptOnEdge1, ptOnEdge2);
+    double ds1 = scalarProd(oneAxis, p2p1);
+    double ds2 = scalarProd(twoAxis, p2p1);
+    double sl1 = vLength2(oneAxis);
+    double sl2 = vLength2(twoAxis);
+    double sp = scalarProd(oneAxis, twoAxis);
+    double denom = sl1 * sl2 - sp*sp;
+    double a = (sp * ds2 - sl2 * ds1) / denom;
+    double b = (sl1 * ds2 - sp * ds1) / denom;
+    Vector p = vAdd(vMult(vAdd(ptOnEdge1, vMult(oneAxis, a)), 0.5),
+                    vMult(vAdd(ptOnEdge2, vMult(twoAxis, b)), 0.5));
+    collisions[collisionC].p = p;
+    collisions[collisionC].normal = axis;
+    collisions[collisionC].penetration = minPen;
+  }
 }
 
 #endif
