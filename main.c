@@ -25,7 +25,24 @@ void printCollision(PointCollision *pC) {
   printf("penetration: %7.2f\n", pC->penetration);
 }
 
+Matrix33 cubeiit = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+Matrix34 null34 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
 int main() {
+  Rigidbody rb = {{10, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {1, 0, 0, 0}, 1, cubeiit, null34};
+  Rigidbody rb2 = {{8, 0, 3}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {1, 0, 0, 0}, 1, cubeiit, null34};
+  rb.transformMatrix = m34FromQV(rb.o, rb.p);
+  rb2.transformMatrix = m34FromQV(rb2.o, rb2.p);
+  CollisionBox cb = {&rb, {0, 0, 0}, {2, 2, 2}};
+  CollisionBox cb2 = {&rb2, {0, 0, 0}, {2, 2, 2}};
+  //Vector axis = vNorm((Vector) {1, 1, 0});
+  //double pen = axisPenetration(&cb, &cb2, axis);
+  //double projection = projectToAxis(&cb, axis);
+  BoxBoxCollision(&cb, &cb2);
+  //printf("%f\n", pen);
+}
+
+/*int main() {
 
   fbInit();
 
@@ -55,4 +72,4 @@ int main() {
     drawV(rbp, black);
     drawV(rbp2, black);
   }
-}
+}*/
