@@ -29,21 +29,48 @@ Matrix33 cubeiit = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 Matrix34 null34 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 int main() {
+  fbInit();
   Rigidbody rb = {{10, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {1, 0, 0, 0}, 1, cubeiit, null34};
-  Rigidbody rb2 = {{8, 0, 3}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0.7, 0.5, 0, 0.5}, 1, cubeiit, null34};
+  //Rigidbody rb2 = {{8, 3, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {1, 0, 0, 0}, 1, cubeiit, null34};
+  Rigidbody rb2 = {{8, 3, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0.901, 0, 0, 0.434}, 1, cubeiit, null34};
+  rb2.o = qNorm(rb2.o);
   rb.transformMatrix = m34FromQV(rb.o, rb.p);
   rb2.transformMatrix = m34FromQV(rb2.o, rb2.p);
   CollisionBox cb = {&rb, {0, 0, 0}, {2, 2, 2}};
   CollisionBox cb2 = {&rb2, {0, 0, 0}, {2, 2, 2}};
-  //Vector axis = vNorm((Vector) {1, 1, 0});
-  //double pen = axisPenetration(&cb, &cb2, axis);
-  //double projection = projectToAxis(&cb, axis);
+  Vector p1 = m34vMult(rb2.transformMatrix, (Vector){2, 2, 0});
+  Vector p2 = m34vMult(rb2.transformMatrix, (Vector){2, -2, 0});
+  Vector p3 = m34vMult(rb2.transformMatrix, (Vector){-2, 2, 0});
+  Vector p4 = m34vMult(rb2.transformMatrix, (Vector){-2, -2, 0});
+  Vector p5 = m34vMult(rb.transformMatrix, (Vector){2, 2, 0});
+  Vector p6 = m34vMult(rb.transformMatrix, (Vector){2, -2, 0});
+  Vector p7 = m34vMult(rb.transformMatrix, (Vector){-2, 2, 0});
+  Vector p8 = m34vMult(rb.transformMatrix, (Vector){-2, -2, 0});
+  //for (;;) {
+    drawV(p1, red);
+    drawV(p2, red);
+    drawV(p3, red);
+    drawV(p4, red);
+    drawV(p5, blue);
+    drawV(p6, blue);
+    drawV(p7, blue);
+    drawV(p8, blue);
+    usleep((int)(1000000*dTime));
+    drawV(p1, black);
+    drawV(p2, black);
+    drawV(p3, black);
+    drawV(p4, black);
+    drawV(p5, black);
+    drawV(p6, black);
+    drawV(p7, black);
+    drawV(p8, black);
+  //}
+  
   BoxBoxCollision(&cb, &cb2);
   for (int i = 0; i < 3; i++) {
     printf("pen: %f ", collisions[i].penetration);
     printV(collisions[i].p);
   }
-  //printf("%f\n", pen);
 }
 
 /*int main() {
