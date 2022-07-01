@@ -4,10 +4,11 @@ LDFLAGS = -lm
 all: src/*.c
 	$(CC) $(CFLAGS) $(LDFLAGS) src/*.c -o libpe.so
 install:
+	mkdir -p /usr/local/include/pe
 	install -m755 libpe.so /usr/local/lib64
 	#install -m755 inc/* /usr/local/include
-	install -m755 inc/matrix.h /usr/local/include
-	install -m755 inc/quaternion.h /usr/local/include
-	install -m755 inc/rigidbody.h /usr/local/include
-	install -m755 inc/narrowcollision.h /usr/local/include
-	install -m755 inc/vector.h /usr/local/include
+	install -m755 inc/matrix.h /usr/local/include/pe
+	install -m755 inc/quaternion.h /usr/local/include/pe
+	install -m755 inc/rigidbody.h /usr/local/include/pe
+	install -m755 inc/narrowcollision.h /usr/local/include/pe
+	install -m755 inc/vector.h /usr/local/include/pe
