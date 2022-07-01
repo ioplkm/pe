@@ -1,12 +1,4 @@
-#ifndef VECTOR_H
-#define VECTOR_H
-
-#include <math.h>
-#include <stdbool.h>
-
-typedef struct {
-  double x, y, z;
-} Vector;
+#include "../inc/vector.h"
 
 void printV(Vector v) {
   printf("x:%7.2f y:%7.2f z:%7.2f\n", v.x, v.y, v.z);
@@ -69,5 +61,3 @@ double vDist2(Vector v1, Vector v2) {
 Vector vInv(Vector v) {
   return (Vector){-v.x, -v.y, -v.z};
 }
-
-#endif

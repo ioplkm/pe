@@ -3,15 +3,15 @@
 
 #include <unistd.h>
 
-#include "include/pointspring.h"
-#include "include/pointcable.h"
+#include "inc/pointspring.h"
+#include "inc/pointcable.h"
 
-#include "include/matrix.h"
-#include "include/rigidbody.h"
-#include "include/spring.h"
+#include "inc/matrix.h"
+#include "inc/rigidbody.h"
+#include "inc/spring.h"
 
-#include "include/broadcollision.h"
-#include "include/narrowcollision.h"
+#include "inc/broadcollision.h"
+#include "inc/narrowcollision.h"
 
 #include <fb.h>
 

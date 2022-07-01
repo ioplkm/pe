@@ -1,17 +1,4 @@
-#ifndef RIGIDBODY_H
-#define RIGIDBODY_H
-
-#include "quaternion.h"
-#include "matrix.h"
-
-typedef struct {
-  Vector p, v, r, a, f, t;
-  Quaternion o;
-  double inverseMass;
-  Matrix33 inverseInertiaTensor;
-
-  Matrix34 transformMatrix;
-} Rigidbody;
+#include "../inc/rigidbody.h"
 
 /*Matrix34 calcTransformMatrix(Vector p, Quaternion o) {
   return m34FromQV(o, p);
@@ -56,5 +43,3 @@ void updateRigidbody(Rigidbody *pRB, double dTime) {
   pRB->f = (Vector){0, 0, 0};
   pRB->t = (Vector){0, 0, 0};
 }
-
-#endif

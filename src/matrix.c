@@ -1,16 +1,4 @@
-#ifndef MATRIX_H
-#define MATRIX_H
-
-#include "vector.h"
-#include "quaternion.h"
-
-typedef struct {
-  double data[9];
-} Matrix33;
-
-typedef struct {
-  double data[12];
-} Matrix34;
+#include "../inc/matrix.h"
 
 Vector m33vMult(Matrix33 m, Vector v) {
   return (Vector){v.x * m.data[0] + v.y * m.data[1] + v.z * m.data[2],
@@ -182,5 +170,3 @@ Vector worldToLocalDir(Vector local, Matrix34 trans) {
                   local.x * trans.data[1] + local.y * trans.data[5] + local.z * trans.data[9],
                   local.x * trans.data[2] + local.y * trans.data[6] + local.z * trans.data[10]};
 }
-
-#endif

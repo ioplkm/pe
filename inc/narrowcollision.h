@@ -1,6 +1,8 @@
 #ifndef NARROWCOLLISION_H
 #define NARROWCOLLISION_H
 
+#include <float.h> //for DBL_MAX
+
 #include "vector.h"
 #include "rigidbody.h"
 #include "matrix.h"
@@ -35,10 +37,10 @@ typedef struct {
   double penetration;
 } Collision;
 
-Collision collisions[999];
-int collisionC;
+//Collision collisions[999];
+//int collisionC;
 
-void SphereSphereCollision(CollisionSphere *pCS1, CollisionSphere *pCS2) {
+/*void SphereSphereCollision(CollisionSphere *pCS1, CollisionSphere *pCS2) {
   Vector s1p = pCS1->pRB->p;
   Vector s2p = pCS2->pRB->p;
   Vector midline = vSub(s1p, s2p);
@@ -230,5 +232,6 @@ void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2) {
     collisions[collisionC].penetration = minPen;
   }
 }
-
+*/
+void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2);
 #endif

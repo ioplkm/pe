@@ -1,13 +1,4 @@
-#ifndef QUATERNION_H
-#define QUATERNION_H
-
-#include <math.h>
-
-#include "vector.h"
-
-typedef struct {
-  double r, i, j, k;
-} Quaternion;
+#include "../inc/quaternion.h"
 
 Quaternion qNorm(Quaternion q) {
   double d = q.r*q.r + q.i*q.i + q.j*q.j + q.k*q.k;
@@ -34,5 +25,3 @@ Quaternion qvAdd(Quaternion q, Vector v) {
                       q.j + t.j/2.0,
                       q.k + t.k/2.0};
 }
-
-#endif
