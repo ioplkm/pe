@@ -1,8 +1,8 @@
 CC = clang
 CFLAGS = -Wall -Wextra -Wpedantic -pipe -O3 -std=c99 -s -flto=thin -shared -fPIC
-LDFLAGS = -lm 
-all: src/*.c
-	$(CC) $(CFLAGS) $(LDFLAGS) src/*.c -o libpe.so
+LDFLAGS = -lm
+all: src/*
+	$(CC) $(CFLAGS) $(LDFLAGS) src/* -o libpe.so
 install:
 	mkdir -p /usr/local/include/pe
 	install -m755 libpe.so /usr/local/lib64
@@ -12,3 +12,9 @@ install:
 	install -m755 inc/rigidbody.h /usr/local/include/pe
 	install -m755 inc/narrowcollision.h /usr/local/include/pe
 	install -m755 inc/vector.h /usr/local/include/pe
+	install -m755 inc/spring.h /usr/local/include/pe
+	#broadcollision.h
+	#point.h
+	#pointcable.h
+	#pointcollision.h
+	#pointspring.h

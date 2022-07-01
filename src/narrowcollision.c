@@ -1,8 +1,5 @@
 #include "../inc/narrowcollision.h"
 
-Collision collisions[999];
-int collisionC;
-
 void SphereSphereCollision(CollisionSphere *pCS1, CollisionSphere *pCS2) {
   Vector s1p = pCS1->pRB->p;
   Vector s2p = pCS2->pRB->p;
