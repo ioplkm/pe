@@ -1,6 +1,6 @@
 #include "../inc/narrowcollision.h"
 
-void SphereSphereCollision(CollisionSphere *pCS1, CollisionSphere *pCS2) {
+/*void SphereSphereCollision(CollisionSphere *pCS1, CollisionSphere *pCS2) {
   Vector s1p = pCS1->pRB->p;
   Vector s2p = pCS2->pRB->p;
   Vector midline = vSub(s1p, s2p);
@@ -61,7 +61,7 @@ void BoxSphereCollision(CollisionBox *pCB, CollisionSphere *pCS) {
   collisions[collisionC].normal = vNorm(vSub(closestPWorld, pCS->pRB->p));
   collisions[collisionC].penetration = pCS->r - fabs(dist);
   collisionC++;
-}
+}*/
 
 //////////////////////////////////////////////
 
@@ -83,7 +83,7 @@ double axisPenetration(CollisionBox *pB1, CollisionBox *pB2, Vector axis) {
   return project1 + project2 - dist;
 }
 
-void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2) {
+void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
   Vector axes[15]; //to optimize later
   Vector b1x = getTransformRow(pB1->pRB->transformMatrix, 0);
   Vector b1y = getTransformRow(pB1->pRB->transformMatrix, 1);
@@ -112,18 +112,18 @@ void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2) {
   int best;
   for (int i = 0; i < 15; i++) {
     axis = axes[i];
-    //if (vIsZero(axis)) continue;
-    if (vIsZero(axis)) {printf("drop\n"); continue;}
+    if (vIsZero(axis)) continue;
+    //if (vIsZero(axis)) {printf("drop\n"); continue;}
     axis = vNorm(axis);
     double pen = axisPenetration(pB1, pB2, axis);
-    printf("pen: %f\n", pen);
+    //printf("pen: %f\n", pen);
     if (pen <= minPen) {
       minPen = pen;
       best = i;
     }
   }
 
-  printf("best: %d\n", best);
+  //printf("best: %d\n", best);
 
   if (best < 3) {
     Vector normal = getTransformRow(pB1->pRB->transformMatrix, best);
@@ -133,9 +133,9 @@ void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2) {
     if (scalarProd(getTransformRow(pB2->pRB->transformMatrix, 1), normal) < 0) vertex.y *= -1;
     if (scalarProd(getTransformRow(pB2->pRB->transformMatrix, 2), normal) < 0) vertex.z *= -1;
 
-    collisions[collisionC].p = m34vMult(pB2->pRB->transformMatrix, vertex);
-    collisions[collisionC].normal = normal;
-    collisions[collisionC].penetration = minPen;
+    pC->p = m34vMult(pB2->pRB->transformMatrix, vertex);
+    pC->normal = normal;
+    pC->penetration = minPen;
   } else if (best < 6) {
     best -= 3;
     Vector normal = getTransformRow(pB2->pRB->transformMatrix, best);
@@ -145,9 +145,9 @@ void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2) {
     if (scalarProd(getTransformRow(pB1->pRB->transformMatrix, 1), normal) < 0) vertex.y *= -1;
     if (scalarProd(getTransformRow(pB1->pRB->transformMatrix, 2), normal) < 0) vertex.z *= -1;
 
-    collisions[collisionC].p = m34vMult(pB1->pRB->transformMatrix, vertex);
-    collisions[collisionC].normal = normal;
-    collisions[collisionC].penetration = minPen;
+    pC->p = m34vMult(pB1->pRB->transformMatrix, vertex);
+    pC->normal = normal;
+    pC->penetration = minPen;
   } else {
     best -= 6;
     int oneAxisIndex = best / 3;
@@ -187,8 +187,8 @@ void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2) {
     double b = (sl1 * ds2 - sp * ds1) / denom;
     Vector p = vAdd(vMult(vAdd(ptOnEdge1, vMult(oneAxis, a)), 0.5),
                     vMult(vAdd(ptOnEdge2, vMult(twoAxis, b)), 0.5));
-    collisions[collisionC].p = p;
-    collisions[collisionC].normal = axis;
-    collisions[collisionC].penetration = minPen;
+    pC->p = p;
+    pC->normal = axis;
+    pC->penetration = minPen;
   }
 }

@@ -13,6 +13,7 @@ install:
 	install -m755 inc/narrowcollision.h /usr/local/include/pe
 	install -m755 inc/vector.h /usr/local/include/pe
 	install -m755 inc/spring.h /usr/local/include/pe
+	install -m755 inc/resolution.h /usr/local/include/pe
 	#broadcollision.h
 	#point.h
 	#pointcable.h

@@ -37,8 +37,8 @@ typedef struct {
   double penetration;
 } Collision;
 
-Collision collisions[999];
-int collisionC;
+//Collision collisions[999];
+//int collisionC;
 
 /*void SphereSphereCollision(CollisionSphere *pCS1, CollisionSphere *pCS2) {
   Vector s1p = pCS1->pRB->p;
@@ -233,5 +233,5 @@ void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2) {
   }
 }
 */
-void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2);
+void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC);
 #endif
