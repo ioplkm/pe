@@ -190,5 +190,7 @@ void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
     pC->p = p;
     pC->normal = axis;
     pC->penetration = minPen;
+    pC->pB1 = pB1->pRB;
+    pC->pB2 = pB2->pRB;
   }
 }

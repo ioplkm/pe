@@ -35,6 +35,7 @@ typedef struct {
   Vector p;
   Vector normal;
   double penetration;
+  Rigidbody *pB1, *pB2;
 } Collision;
 
 //Collision collisions[999];

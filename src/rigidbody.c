@@ -32,7 +32,7 @@ void applyForceAtPoint(Rigidbody *pRB, Vector f, Vector p) {
 
 void updateRigidbody(Rigidbody *pRB, double dTime) {
   Vector aRes = vAdd(pRB->a, vMult(pRB->f, pRB->inverseMass));
-  Matrix33 iitw = calcInverseInertiaTensorWorld(pRB->inverseInertiaTensor, pRB->transformMatrix);
+  Matrix33 iitw = calcInverseInertiaTensorWorld(pRB->iit, pRB->transformMatrix);
   Vector aaRes = m33vMult(iitw, pRB->t);
 
   pRB->v = vMult(   vAdd(pRB->v, vMult(aRes, dTime))   ,pow(0.99, dTime));

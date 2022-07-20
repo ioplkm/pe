@@ -8,7 +8,8 @@ typedef struct {
   Vector p, v, r, a, f, t;
   Quaternion o;
   double inverseMass;
-  Matrix33 inverseInertiaTensor;
+  //Matrix33 inverseInertiaTensor;
+  Matrix33 iit;
 
   Matrix34 transformMatrix;
 } Rigidbody;
