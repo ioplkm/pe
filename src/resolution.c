@@ -15,8 +15,8 @@ void resolveCollision(Collision *pC) {
   dvWorld = vectorProd(dvWorld, localP1);
   //Vector vPerUnitImpulseCollision = m33vMult(m33transpose(transform), vPerUnitImpulse);
   //double v = vPerUnitImpulseCollision.x;
-  double dv = scalarProd(dvWorld, pC->normal);
-  dv += pC->pB1->inverseMass;
+  double desv = scalarProd(dvWorld, pC->normal);
+  desv += pC->pB1->inverseMass;
 
   Vector localP2 = vSub(pC->p, pC->pB2->p);
   dvWorld = vectorProd(localP2, pC->normal);
@@ -24,6 +24,13 @@ void resolveCollision(Collision *pC) {
   dvWorld = vectorProd(dvWorld, localP2);
   //Vector vPerUnitImpulseCollision = m33vMult(m33transpose(transform), vPerUnitImpulse);
   //double v = vPerUnitImpulseCollision.x;
-  dv = scalarProd(dvWorld, pC->normal);
-  dv += pC->pB2->inverseMass;
+  desv = scalarProd(dvWorld, pC->normal);
+  desv += pC->pB2->inverseMass;
+
+  Vector cv = vectorProd(pC->pB1->r, localP1);
+  cv = vAdd(cv, pC->pB1->v);
+  cv = vSub(cv, vectorProd(pC->pB2->r, localP2));
+  cv = vSub(cv, pC->pB2->v);
+  cv = m33vMult(m33Transpose(transform), cv);
+  double dv = -cv.x * (1 + pC->r);
 }
