@@ -166,20 +166,20 @@ int BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
 
     Vector ptOnEdge1 = pB1->halfSize;
     if (oneAxisIndex == 0) ptOnEdge1.x = 0;
-    else if (scalarProd(getTransformRow(pB1->pRB->transformMatrix, 0), axis) > 0) ptOnEdge1.x = -ptOnEdge1.x;
+    else if (scalarProd(b1x, axis) > 0) ptOnEdge1.x = -ptOnEdge1.x;
     if (oneAxisIndex == 1) ptOnEdge1.y = 0;
-    else if (scalarProd(getTransformRow(pB1->pRB->transformMatrix, 1), axis) > 0) ptOnEdge1.y = -ptOnEdge1.y;
+    else if (scalarProd(b1y, axis) > 0) ptOnEdge1.y = -ptOnEdge1.y;
     if (oneAxisIndex == 2) ptOnEdge1.z = 0;
-    else if (scalarProd(getTransformRow(pB1->pRB->transformMatrix, 2), axis) > 0) ptOnEdge1.z = -ptOnEdge1.z;
+    else if (scalarProd(b1z, axis) > 0) ptOnEdge1.z = -ptOnEdge1.z;
     ptOnEdge1 = m34vMult(pB1->pRB->transformMatrix, ptOnEdge1);
 
     Vector ptOnEdge2 = pB2->halfSize;
     if (twoAxisIndex == 0) ptOnEdge2.x = 0;
-    else if (scalarProd(getTransformRow(pB2->pRB->transformMatrix, 0), axis) < 0) ptOnEdge2.x = -ptOnEdge2.x;
+    else if (scalarProd(b2x, axis) < 0) ptOnEdge2.x = -ptOnEdge2.x;
     if (twoAxisIndex == 1) ptOnEdge2.y = 0;
-    else if (scalarProd(getTransformRow(pB2->pRB->transformMatrix, 1), axis) < 0) ptOnEdge2.y = -ptOnEdge2.y;
+    else if (scalarProd(b2y, axis) < 0) ptOnEdge2.y = -ptOnEdge2.y;
     if (twoAxisIndex == 2) ptOnEdge2.z = 0;
-    else if (scalarProd(getTransformRow(pB2->pRB->transformMatrix, 2), axis) < 0) ptOnEdge2.z = -ptOnEdge2.z;
+    else if (scalarProd(b2z, axis) < 0) ptOnEdge2.z = -ptOnEdge2.z;
     ptOnEdge2 = m34vMult(pB2->pRB->transformMatrix, ptOnEdge2);
 
     Vector p2p1 = vSub(ptOnEdge1, ptOnEdge2);
