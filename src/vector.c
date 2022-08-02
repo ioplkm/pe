@@ -26,6 +26,10 @@ Vector vMult(Vector v, double d) {
   return (Vector){v.x * d, v.y * d, v.z * d};
 }
 
+Vector vDiv(Vector v, double d) {
+  return (Vector){v.x / d, v.y / d, v.z / d};
+}
+
 double vLength(Vector v) {
   return sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
 }

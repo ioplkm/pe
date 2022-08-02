@@ -21,6 +21,8 @@ Vector vectorProd(Vector v1, Vector v2);
 
 Vector vMult(Vector v, double d);
 
+Vector vDiv(Vector v, double d);
+
 double vLength(Vector v);
 
 double vLength2(Vector v);

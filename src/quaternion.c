@@ -25,3 +25,12 @@ Quaternion qvAdd(Quaternion q, Vector v) {
                       q.j + t.j/2.0,
                       q.k + t.k/2.0};
 }
+
+Quaternion asv(Quaternion q, Vector v) {
+  Quaternion tmp = {0, v.x, v.y, v.z};
+  tmp = qMult(q, tmp);
+  return (Quaternion){q.r + tmp.r *0.5,
+                      q.i + tmp.i *0.5,
+                      q.j + tmp.j *0.5,
+                      q.k + tmp.k *0.5};
+}

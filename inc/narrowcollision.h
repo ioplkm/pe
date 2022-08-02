@@ -235,5 +235,5 @@ void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2) {
   }
 }
 */
-void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC);
+int BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC);
 #endif

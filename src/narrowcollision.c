@@ -83,7 +83,7 @@ double axisPenetration(CollisionBox *pB1, CollisionBox *pB2, Vector axis) {
   return project1 + project2 - dist;
 }
 
-void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
+int BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
   Vector axes[15]; //to optimize later
   Vector b1x = getTransformRow(pB1->pRB->transformMatrix, 0);
   Vector b1y = getTransformRow(pB1->pRB->transformMatrix, 1);
@@ -107,24 +107,22 @@ void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
   axes[13] = vectorProd(b1z, b2y);
   axes[14] = vectorProd(b1z, b2z);
 
-  Vector axis;
   double minPen = DBL_MAX;
-  int best;
+  int best = 0;
+  Vector axis;
   for (int i = 0; i < 15; i++) {
     axis = axes[i];
     if (vIsZero(axis)) continue;
-    //if (vIsZero(axis)) {printf("drop\n"); continue;}
     axis = vNorm(axis);
     double pen = axisPenetration(pB1, pB2, axis);
-    //printf("pen: %f\n", pen);
+    //printf("axis %d, pen is %f\n", i, pen);
+    if (pen < 0) return 0;
     if (pen <= minPen) {
       minPen = pen;
       best = i;
     }
   }
-
-  //printf("best: %d\n", best);
-
+  //printf("best axis: %d\n", best);
   if (best < 3) {
     Vector normal = getTransformRow(pB1->pRB->transformMatrix, best);
     if (scalarProd(normal, vSub(pB2->pRB->p, pB1->pRB->p)) > 0) normal = vInv(normal);
@@ -136,6 +134,10 @@ void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
     pC->p = m34vMult(pB2->pRB->transformMatrix, vertex);
     pC->normal = normal;
     pC->penetration = minPen;
+    pC->r = 0;
+    pC->pB1 = pB1->pRB;
+    pC->pB2 = pB2->pRB;
+    return 1;
   } else if (best < 6) {
     best -= 3;
     Vector normal = getTransformRow(pB2->pRB->transformMatrix, best);
@@ -148,6 +150,10 @@ void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
     pC->p = m34vMult(pB1->pRB->transformMatrix, vertex);
     pC->normal = normal;
     pC->penetration = minPen;
+    pC->r = 0;
+    pC->pB1 = pB1->pRB;
+    pC->pB2 = pB2->pRB;
+    return 1;
   } else {
     best -= 6;
     int oneAxisIndex = best / 3;
@@ -190,7 +196,9 @@ void BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
     pC->p = p;
     pC->normal = axis;
     pC->penetration = minPen;
+    pC->r = 0;
     pC->pB1 = pB1->pRB;
     pC->pB2 = pB2->pRB;
+    return 1;
   }
 }
