@@ -127,9 +127,9 @@ int BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
     Vector normal = getTransformRow(pB1->pRB->transformMatrix, best);
     if (scalarProd(normal, vSub(pB2->pRB->p, pB1->pRB->p)) > 0) normal = vInv(normal);
     Vector vertex = pB2->halfSize;
-    if (scalarProd(getTransformRow(pB2->pRB->transformMatrix, 0), normal) < 0) vertex.x *= -1;
-    if (scalarProd(getTransformRow(pB2->pRB->transformMatrix, 1), normal) < 0) vertex.y *= -1;
-    if (scalarProd(getTransformRow(pB2->pRB->transformMatrix, 2), normal) < 0) vertex.z *= -1;
+    if (scalarProd(b2x, normal) < 0) vertex.x *= -1;
+    if (scalarProd(b2y, normal) < 0) vertex.y *= -1;
+    if (scalarProd(b2z, normal) < 0) vertex.z *= -1;
 
     pC->p = m34vMult(pB2->pRB->transformMatrix, vertex);
     pC->normal = normal;
@@ -143,9 +143,9 @@ int BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
     Vector normal = getTransformRow(pB2->pRB->transformMatrix, best);
     if (scalarProd(normal, vSub(pB1->pRB->p, pB2->pRB->p)) > 0) normal = vInv(normal);
     Vector vertex = pB1->halfSize;
-    if (scalarProd(getTransformRow(pB1->pRB->transformMatrix, 0), normal) < 0) vertex.x *= -1;
-    if (scalarProd(getTransformRow(pB1->pRB->transformMatrix, 1), normal) < 0) vertex.y *= -1;
-    if (scalarProd(getTransformRow(pB1->pRB->transformMatrix, 2), normal) < 0) vertex.z *= -1;
+    if (scalarProd(b1x, normal) < 0) vertex.x *= -1;
+    if (scalarProd(b1y, normal) < 0) vertex.y *= -1;
+    if (scalarProd(b1z, normal) < 0) vertex.z *= -1;
 
     pC->p = m34vMult(pB1->pRB->transformMatrix, vertex);
     pC->normal = normal;
