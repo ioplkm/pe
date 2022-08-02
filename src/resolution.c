@@ -41,7 +41,7 @@ void resolveVelocity(Collision *pC) {
   imp = m33vMult(transform, imp);
   //applying impulse
   pC->pB1->v = vAdd(pC->pB1->v, vMult(imp, pC->pB1->inverseMass));
-  pC->pB1->r = vAdd(pC->pB1->r, m33vMult(pC->pB1->iit, vectorProd(imp, localP1)));
+  //pC->pB1->r = vAdd(pC->pB1->r, m33vMult(pC->pB1->iit, vectorProd(imp, localP1)));
 //  pC->pB2->v = vAdd(pC->pB2->v, vMult(imp, -pC->pB2->inverseMass));
 //  pC->pB2->r = vAdd(pC->pB2->r, m33vMult(pC->pB2->iit, vectorProd(vInv(imp), localP2)));
 }
@@ -82,7 +82,7 @@ void resolveInterpenetration(Collision *pC) {
   //applying angular movements
   Vector impulsePerMove = m33vMult(pC->pB1->iit, vectorProd(localP1, pC->normal));
   Vector rotation = vMult(impulsePerMove, angMove1 / angInertia1);
-  //pC->pB1->o = qRotate(pC->pB1->o, rotation);
+  //pC->pB1->o = qvAdd(pC->pB1->o, rotation);
   impulsePerMove = m33vMult(pC->pB2->iit, vectorProd(localP2, pC->normal));
   Vector rotationPerMove = vDiv(impulsePerMove, angInertia2);
   rotation = vMult(rotationPerMove, angMove2);
