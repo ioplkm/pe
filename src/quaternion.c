@@ -10,8 +10,8 @@ Quaternion qNorm(Quaternion q) {
 Quaternion qMult(Quaternion q1, Quaternion q2) {
   return (Quaternion){q1.r*q2.r - q1.i*q2.i - q1.j*q2.j - q1.k*q2.k,
                       q1.r*q2.i + q1.i*q2.r + q1.j*q2.k - q1.k*q2.j,
-                      q1.r*q2.j - q1.j*q2.r + q1.k*q2.i + q1.i*q2.k,
-                      q1.r*q2.k + q1.k*q2.r - q1.i*q2.j + q1.j*q2.i};
+                      q1.r*q2.j - q1.i*q2.k + q1.j*q2.r + q1.k*q2.i,
+                      q1.r*q2.k + q1.i*q2.j - q1.j*q2.i + q1.k*q2.r};
 }
 
 Quaternion qRotate(Quaternion q, Vector v) {
@@ -24,13 +24,4 @@ Quaternion qvAdd(Quaternion q, Vector v) {
                       q.i + t.i/2.0,
                       q.j + t.j/2.0,
                       q.k + t.k/2.0};
-}
-
-Quaternion asv(Quaternion q, Vector v) {
-  Quaternion tmp = {0, v.x, v.y, v.z};
-  tmp = qMult(q, tmp);
-  return (Quaternion){q.r + tmp.r *0.5,
-                      q.i + tmp.i *0.5,
-                      q.j + tmp.j *0.5,
-                      q.k + tmp.k *0.5};
 }

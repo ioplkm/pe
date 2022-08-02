@@ -115,14 +115,13 @@ int BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
     if (vIsZero(axis)) continue;
     axis = vNorm(axis);
     double pen = axisPenetration(pB1, pB2, axis);
-    //printf("axis %d, pen is %f\n", i, pen);
     if (pen < 0) return 0;
-    if (pen <= minPen) {
+    if (pen < minPen) {
       minPen = pen;
       best = i;
     }
   }
-  //printf("best axis: %d\n", best);
+
   if (best < 3) {
     Vector normal = getTransformRow(pB1->pRB->transformMatrix, best);
     if (scalarProd(normal, vSub(pB2->pRB->p, pB1->pRB->p)) > 0) normal = vInv(normal);

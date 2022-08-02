@@ -17,6 +17,4 @@ Quaternion qRotate(Quaternion q, Vector v);
 
 Quaternion qvAdd(Quaternion q, Vector v);
  
-Quaternion asv(Quaternion q, Vector v);
-
 #endif

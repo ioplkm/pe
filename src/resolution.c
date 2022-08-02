@@ -57,7 +57,8 @@ void resolveInterpenetration(Collision *pC) {
   angInertia = m33vMult(pC->pB2->iit, angInertia);
   angInertia = vectorProd(angInertia, localP2);
   double angInertia2 = scalarProd(angInertia, pC->normal);
-  double iInertia = 1 / (pC->pB1->inverseMass + pC->pB2->inverseMass + angInertia1 + angInertia2);
+  //double iInertia = 1 / (pC->pB1->inverseMass + pC->pB2->inverseMass + angInertia1 + angInertia2);
+  double iInertia = 1 / (pC->pB1->inverseMass + angInertia1);
   //calculating linear and angular movements
   double linMove1 = pC->penetration * pC->pB1->inverseMass * iInertia;
   double angMove1 = pC->penetration * angInertia1 * iInertia;
@@ -80,11 +81,10 @@ void resolveInterpenetration(Collision *pC) {
 //  pC->pB2->p = vAdd(pC->pB2->p, vMult(pC->normal, linMove2));
   //applying angular movements
   Vector impulsePerMove = m33vMult(pC->pB1->iit, vectorProd(localP1, pC->normal));
-  Vector rotationPerMove = vDiv(impulsePerMove, angInertia1);
-  Vector rotation = vMult(rotationPerMove, angMove1);
+  Vector rotation = vMult(impulsePerMove, angMove1 / angInertia1);
   //pC->pB1->o = qRotate(pC->pB1->o, rotation);
   impulsePerMove = m33vMult(pC->pB2->iit, vectorProd(localP2, pC->normal));
-  rotationPerMove = vDiv(impulsePerMove, angInertia2);
+  Vector rotationPerMove = vDiv(impulsePerMove, angInertia2);
   rotation = vMult(rotationPerMove, angMove2);
 //  pC->pB2->o = qRotate(pC->pB2->o, rotation);
 } 
