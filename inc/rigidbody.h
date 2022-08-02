@@ -11,7 +11,7 @@ typedef struct {
   //Matrix33 inverseInertiaTensor;
   Matrix33 iit;
 
-  Matrix34 transformMatrix;
+  Matrix34 transform;
 } Rigidbody;
 
 /*Matrix34 calcTransformMatrix(Vector p, Quaternion o) {

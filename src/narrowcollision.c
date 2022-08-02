@@ -37,7 +37,7 @@ void BoxHalfSpaceCollision(CollisionBox *pCB, CollisionPlane *pCP) {
     Vector p = {i & 1 ? -pCB->halfSize.x : pCB->halfSize.x,
                 i & 2 ? -pCB->halfSize.y : pCB->halfSize.y,
                 i & 4 ? -pCB->halfSize.z : pCB->halfSize.z};
-    p = m34vMult(pCB->pRB->transformMatrix, p);
+    p = m34vMult(pCB->pRB->transform, p);
     double dist = scalarProd(p, pCP->normal);
     if (dist <= pCP->planeOffset) {
       collisions[collisionC].p = vAdd(vMult(pCP->normal, dist - pCP->planeOffset), p);
@@ -48,7 +48,7 @@ void BoxHalfSpaceCollision(CollisionBox *pCB, CollisionPlane *pCP) {
 }
 
 void BoxSphereCollision(CollisionBox *pCB, CollisionSphere *pCS) {
-  Vector relSphereCenter = worldToLocal(pCS->pRB->p, pCB->pRB->transformMatrix);
+  Vector relSphereCenter = worldToLocal(pCS->pRB->p, pCB->pRB->transform);
   Vector closestP = {relSphereCenter.x > pCB->halfSize.x ? pCB->halfSize.x : 
                        relSphereCenter.x < -pCB->halfSize.x ? -pCB->halfSize.x : relSphereCenter.x,
                      relSphereCenter.y > pCB->halfSize.y ? pCB->halfSize.y : 
@@ -56,7 +56,7 @@ void BoxSphereCollision(CollisionBox *pCB, CollisionSphere *pCS) {
                      relSphereCenter.z > pCB->halfSize.z ? pCB->halfSize.z : 
                        relSphereCenter.z < -pCB->halfSize.z ? -pCB->halfSize.z : relSphereCenter.z};
   double dist = vLength2(vSub(closestP, relSphereCenter));
-  Vector closestPWorld = m34vMult(pCB->pRB->transformMatrix, closestP);
+  Vector closestPWorld = m34vMult(pCB->pRB->transform, closestP);
   collisions[collisionC].p = closestPWorld;
   collisions[collisionC].normal = vNorm(vSub(closestPWorld, pCS->pRB->p));
   collisions[collisionC].penetration = pCS->r - fabs(dist);
@@ -69,28 +69,28 @@ Vector getTransformRow(Matrix34 m, int n) {
   return (Vector){m.data[n], m.data[n+4], m.data[n+8]};
 }
 
-double projectToAxis(CollisionBox *pCB, Vector axis) {
-  return pCB->halfSize.x * fabs(scalarProd(axis, getTransformRow(pCB->pRB->transformMatrix, 0))) + 
-         pCB->halfSize.y * fabs(scalarProd(axis, getTransformRow(pCB->pRB->transformMatrix, 1))) +
-         pCB->halfSize.z * fabs(scalarProd(axis, getTransformRow(pCB->pRB->transformMatrix, 2)));
+double projectBoxToAxis(CollisionBox *pCB, Vector axis) {
+  return pCB->halfSize.x * fabs(scalarProd(axis, getTransformRow(pCB->pRB->transform, 0))) + 
+         pCB->halfSize.y * fabs(scalarProd(axis, getTransformRow(pCB->pRB->transform, 1))) +
+         pCB->halfSize.z * fabs(scalarProd(axis, getTransformRow(pCB->pRB->transform, 2)));
 }
 
 double axisPenetration(CollisionBox *pB1, CollisionBox *pB2, Vector axis) {
   Vector b1ToB2 = vSub(pB2->pRB->p, pB1->pRB->p);
-  double project1 = projectToAxis(pB1, axis);
-  double project2 = projectToAxis(pB2, axis);
+  double project1 = projectBoxToAxis(pB1, axis);
+  double project2 = projectBoxToAxis(pB2, axis);
   double dist = fabs(scalarProd(axis, b1ToB2));
   return project1 + project2 - dist;
 }
 
 int BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
   Vector axes[15]; //to optimize later
-  Vector b1x = getTransformRow(pB1->pRB->transformMatrix, 0);
-  Vector b1y = getTransformRow(pB1->pRB->transformMatrix, 1);
-  Vector b1z = getTransformRow(pB1->pRB->transformMatrix, 2);
-  Vector b2x = getTransformRow(pB2->pRB->transformMatrix, 0);
-  Vector b2y = getTransformRow(pB2->pRB->transformMatrix, 1);
-  Vector b2z = getTransformRow(pB2->pRB->transformMatrix, 2);
+  Vector b1x = getTransformRow(pB1->pRB->transform, 0);
+  Vector b1y = getTransformRow(pB1->pRB->transform, 1);
+  Vector b1z = getTransformRow(pB1->pRB->transform, 2);
+  Vector b2x = getTransformRow(pB2->pRB->transform, 0);
+  Vector b2y = getTransformRow(pB2->pRB->transform, 1);
+  Vector b2z = getTransformRow(pB2->pRB->transform, 2);
   axes[0] = b1x;
   axes[1] = b1y;
   axes[2] = b1z;
@@ -123,14 +123,14 @@ int BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
   }
 
   if (best < 3) {
-    Vector normal = getTransformRow(pB1->pRB->transformMatrix, best);
+    Vector normal = getTransformRow(pB1->pRB->transform, best);
     if (scalarProd(normal, vSub(pB2->pRB->p, pB1->pRB->p)) > 0) normal = vInv(normal);
     Vector vertex = pB2->halfSize;
     if (scalarProd(b2x, normal) < 0) vertex.x *= -1;
     if (scalarProd(b2y, normal) < 0) vertex.y *= -1;
     if (scalarProd(b2z, normal) < 0) vertex.z *= -1;
 
-    pC->p = m34vMult(pB2->pRB->transformMatrix, vertex);
+    pC->p = m34vMult(pB2->pRB->transform, vertex);
     pC->normal = normal;
     pC->penetration = minPen;
     pC->r = 0;
@@ -139,14 +139,14 @@ int BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
     return 1;
   } else if (best < 6) {
     best -= 3;
-    Vector normal = getTransformRow(pB2->pRB->transformMatrix, best);
+    Vector normal = getTransformRow(pB2->pRB->transform, best);
     if (scalarProd(normal, vSub(pB1->pRB->p, pB2->pRB->p)) > 0) normal = vInv(normal);
     Vector vertex = pB1->halfSize;
     if (scalarProd(b1x, normal) < 0) vertex.x *= -1;
     if (scalarProd(b1y, normal) < 0) vertex.y *= -1;
     if (scalarProd(b1z, normal) < 0) vertex.z *= -1;
 
-    pC->p = m34vMult(pB1->pRB->transformMatrix, vertex);
+    pC->p = m34vMult(pB1->pRB->transform, vertex);
     pC->normal = normal;
     pC->penetration = minPen;
     pC->r = 0;
@@ -157,8 +157,8 @@ int BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
     best -= 6;
     int oneAxisIndex = best / 3;
     int twoAxisIndex = best % 3;
-    Vector oneAxis = getTransformRow(pB1->pRB->transformMatrix, oneAxisIndex);
-    Vector twoAxis = getTransformRow(pB2->pRB->transformMatrix, twoAxisIndex);
+    Vector oneAxis = getTransformRow(pB1->pRB->transform, oneAxisIndex);
+    Vector twoAxis = getTransformRow(pB2->pRB->transform, twoAxisIndex);
     Vector axis = vectorProd(oneAxis, twoAxis);
     axis = vNorm(axis);
     if (scalarProd(axis, vSub(pB2->pRB->p, pB1->pRB->p)) > 0) axis = vInv(axis);
@@ -170,7 +170,7 @@ int BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
     else if (scalarProd(b1y, axis) > 0) ptOnEdge1.y = -ptOnEdge1.y;
     if (oneAxisIndex == 2) ptOnEdge1.z = 0;
     else if (scalarProd(b1z, axis) > 0) ptOnEdge1.z = -ptOnEdge1.z;
-    ptOnEdge1 = m34vMult(pB1->pRB->transformMatrix, ptOnEdge1);
+    ptOnEdge1 = m34vMult(pB1->pRB->transform, ptOnEdge1);
 
     Vector ptOnEdge2 = pB2->halfSize;
     if (twoAxisIndex == 0) ptOnEdge2.x = 0;
@@ -179,7 +179,7 @@ int BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
     else if (scalarProd(b2y, axis) < 0) ptOnEdge2.y = -ptOnEdge2.y;
     if (twoAxisIndex == 2) ptOnEdge2.z = 0;
     else if (scalarProd(b2z, axis) < 0) ptOnEdge2.z = -ptOnEdge2.z;
-    ptOnEdge2 = m34vMult(pB2->pRB->transformMatrix, ptOnEdge2);
+    ptOnEdge2 = m34vMult(pB2->pRB->transform, ptOnEdge2);
 
     Vector p2p1 = vSub(ptOnEdge1, ptOnEdge2);
     double ds1 = scalarProd(oneAxis, p2p1);
