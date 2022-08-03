@@ -12,46 +12,16 @@ typedef struct {
   double penetration;
 } PointCollision;
 
-PointCollision *pointCollisions;
-int collisionsAmount;
+//PointCollision *pointCollisions;
+//int collisionsAmount;
 
-void resolveVelocity(Point *pPoint1, Point *pPoint2, Vector normal, double e, double dTime) {
-  double separatingVelocity = scalarProd(vSub(pPoint1->v, pPoint2->v), normal);
-  if (separatingVelocity > 0) return;
-  double newSeparatingVelocity = -separatingVelocity * e;
+void resolvePointVelocity(Point *pPoint1, Point *pPoint2, Vector normal, double e, double dTime);
 
-  Vector acv = vSub(pPoint1->a, pPoint2->a);
-  double acsv = scalarProd(normal, acv) * dTime;
-  if (acsv < 0) {
-    newSeparatingVelocity += e * acsv;
-    if (newSeparatingVelocity < 0) newSeparatingVelocity = 0;
-  }
+void resolvePointInterpenetration(Point *pPoint1, Point *pPoint2, Vector normal, double penetration);
 
-  double deltaVelocity = newSeparatingVelocity - separatingVelocity;
-  double totalInverseMass = pPoint1->inverseMass + pPoint2->inverseMass;
-  Vector impulsePerIMass = vMult(normal, deltaVelocity / totalInverseMass);
-  pPoint1->v = vAdd(pPoint1->v, vMult(impulsePerIMass, pPoint1->inverseMass));
-  pPoint2->v = vSub(pPoint2->v, vMult(impulsePerIMass, pPoint2->inverseMass));
-}
+void resolvePointCollision(PointCollision *pCollision, double dTime);
 
-void resolveInterpenetration(Point *pPoint1, Point *pPoint2, Vector normal, double penetration) {
-  if (penetration <= 0) return;
-  double totalInverseMass = pPoint1->inverseMass + pPoint2->inverseMass;
-  Vector movePerIMass = vMult(normal, penetration / totalInverseMass);
-  pPoint1->p = vAdd(pPoint1->p, vMult(movePerIMass, pPoint1->inverseMass));
-  pPoint2->p = vSub(pPoint2->p, vMult(movePerIMass, pPoint2->inverseMass));
-}
-
-void resolveCollision(PointCollision *pCollision, double dTime) {
-  resolveVelocity(pCollision->pPoint1, pCollision->pPoint2, pCollision->normal, pCollision->e, dTime);
-  resolveInterpenetration(pCollision->pPoint1, pCollision->pPoint2, pCollision->normal, pCollision->penetration);
-}
-
-void resolveCollisions(double dTime) {
-  for (int i = 0; i < collisionsAmount; i++) {
-    resolveCollision(&pointCollisions[i], dTime);
-  }
-}
+//void resolvePointCollisions(double dTime);
 
 /*void resolveCollisions(PointCollision *pCollisionsArray, double dTime) {
   printf("loop start; collisions = %d\n", collisionsAmount);
