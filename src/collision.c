@@ -29,7 +29,7 @@ double penetrationOnAxis(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Vector axis
   return ((max1 < max2 ? max1 : max2) - (min1 > min2 ? min1 : min2)); 
 }
 
-/*int minVerticesOnAxis(ConvexPolyhedra *pP, Vector axis, Vector *pVertices) {
+int minVerticesOnAxis(ConvexPolyhedra *pP, Vector axis, Vector *pVertices) {
   Vector p[8];//convex polyhedra vertices in world coordinates
   for (int i = 0; i < 8; i++) {
     p[i].x = i & 4 ? pP->halfSize.x : -pP->halfSize.x;
@@ -54,9 +54,9 @@ double penetrationOnAxis(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Vector axis
     }
   }
   return c--;
-}*/
+}
 
-int minVerticesOnAxis(ConvexPolyhedra *pP, Vector axis, Vector center, Vector *pVertices) {
+/*int minVerticesOnAxis(ConvexPolyhedra *pP, Vector axis, Vector center, Vector *pVertices) {
   Vector p[8];//convex polyhedra vertices in world coordinates
   for (int i = 0; i < 8; i++) {
     p[i].x = i & 4 ? pP->halfSize.x : -pP->halfSize.x;
@@ -95,18 +95,18 @@ int minVerticesOnAxis(ConvexPolyhedra *pP, Vector axis, Vector center, Vector *p
     };
   }
   return C--;
-}
+}*/
 
 int collision(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Collision *pC) {
-  Vector norm1[6]; //auxiliary axes
-  Vector norm2[6]; //auxiliary axes
-  Vector edge1[12]; //auxiliary axes
-  Vector edge2[12]; //auxiliary axes
+  Vector norm1[6]; //normals of p1
+  Vector norm2[6]; //normals of p2
+  Vector edge1[12]; //edges of p1
+  Vector edge2[12]; //edges of p1
   for (int i = 0; i < 3; i++) {
     norm1[i] = (Vector){pP1->pRB->transform.data[0+i], pP1->pRB->transform.data[4+i], pP1->pRB->transform.data[8+i]};
-    for (int j = 0; j < 4; j++) edge1[i*4+j] = norm1[i];
+    for (int j = 0; j < 4; j++) edge1[i*4+j] = vMult(norm1[i], 2);
     norm2[i] = (Vector){pP2->pRB->transform.data[0+i], pP2->pRB->transform.data[4+i], pP2->pRB->transform.data[8+i]};
-    for (int j = 0; j < 4; j++) edge2[i*4+j] = norm2[i];
+    for (int j = 0; j < 4; j++) edge2[i*4+j] = vMult(norm2[i], 2);
   }
   for (int i = 3; i < 6; i++) {
     norm1[i] = vInv(norm1[i-3]);
@@ -131,7 +131,8 @@ int collision(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Collision *pC) {
     pen = penetrationOnAxis(pP1, pP2, vNorm(axes[i]));
     if (pen != minPen || scalarProd(axes[i], p1p2) <= 0) continue;
     Vector vertices[4];
-    int contactsOnAxis = minVerticesOnAxis(pP2, axes[i], pP1->pRB->p, vertices);
+    //int contactsOnAxis = minVerticesOnAxis(pP2, axes[i], pP1->pRB->p, vertices);
+    int contactsOnAxis = minVerticesOnAxis(pP2, axes[i], vertices);
     for (int j = 0; j < contactsOnAxis; j++) {
       pC->p = vertices[j];
       pC->normal = axes[i];
@@ -147,7 +148,8 @@ int collision(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Collision *pC) {
     pen = penetrationOnAxis(pP1, pP2, vNorm(axes[i]));
     if (pen != minPen || scalarProd(axes[i], p2p1) <= 0) continue;
     Vector vertices[4];
-    int contactsOnAxis = minVerticesOnAxis(pP1, axes[i], pP2->pRB->p, vertices);
+    //int contactsOnAxis = minVerticesOnAxis(pP1, axes[i], pP2->pRB->p, vertices);
+    int contactsOnAxis = minVerticesOnAxis(pP1, axes[i], vertices);
     for (int j = 0; j < contactsOnAxis; j++) {
       pC->p = vertices[j];
       pC->normal = axes[i];
@@ -157,6 +159,59 @@ int collision(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Collision *pC) {
       pC++->pB2 = pP2->pRB;
       contacts++;
     }
+  }
+  Vector edgeP1[12];
+  Vector edgeP2[12];
+  for (int i = 0; i < 4; i++) {
+    edgeP1[i].x = 0;
+    edgeP1[i].y = i & 2 ? 2 : -2;
+    edgeP1[i].z = i & 1 ? -2 : 2;
+    edgeP2[i] = edgeP1[i];
+  }
+  for (int i = 4; i < 8; i++) {
+    edgeP1[i].y = 0;
+    edgeP1[i].x = i & 2 ? 2 : -2;
+    edgeP1[i].z = i & 1 ? -2 : 2;
+    edgeP2[i] = edgeP1[i];
+  }
+  for (int i = 8; i < 12; i++) {
+    edgeP1[i].z = 0;
+    edgeP1[i].x = i & 2 ? 2 : -2;
+    edgeP1[i].y = i & 1 ? -2 : 2;
+    edgeP2[i] = edgeP1[i];
+  }
+  Vector p1w, p2w;
+  Vector p2p1w;
+  double edge1p, edge2p;
+  for (int i = 12; i < 156; i++) {
+    Vector e1 = edge1[(i - 12) / 12];
+    Vector e2 = edge2[(i - 12) % 12];
+    Vector p1 = edgeP1[(i - 12) / 12];
+    Vector p2 = edgeP2[(i - 12) % 12];
+      if (vIsZero(vectorProd(e1, e2))) continue;
+      pen = penetrationOnAxis(pP1, pP2, vNorm(axes[i]));
+      if (pen != minPen) continue;
+      p1w = m34vMult(pP1->pRB->transform, p1);
+      p2w = m34vMult(pP2->pRB->transform, p2);
+      p2p1w = vSub(p1w, p2w);
+      edge1p = scalarProd(e1, p2p1w);
+      edge2p = scalarProd(e2, p2p1w);
+      //don't know what is this
+      double sm1 = vLength2(e1);
+      double sm2 = vLength2(e2);
+      double spe = scalarProd(e1, e2);
+      double denom = sm1 * sm2 - spe * spe;
+      double a = (spe * edge2p - sm2 * edge1p) / denom;
+      double b = (sm1 * edge2p - spe * edge1p) / denom;
+      Vector p = vAdd(vMult(vAdd(p1w, vMult(e1, a)), 0.5),
+                      vMult(vAdd(p2w, vMult(e2, b)), 0.5));
+      pC->p = p;
+      pC->normal = vNorm(axes[i]);
+      pC->penetration = pen;
+      pC->r = 0;
+      pC->pB1 = pP1->pRB;
+      pC++->pB2 = pP2->pRB;
+      contacts++;
   }
   return contacts;
 }
