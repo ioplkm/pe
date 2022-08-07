@@ -82,8 +82,8 @@ void resolveInterpenetration(Collision *pC) {
     linMove2 = totalMove2 - angMove2;
   }
   //applying linear movements
-  pC->pB1->p = vAdd(pC->pB1->p, vMult(pC->normal, linMove1));
-  pC->pB2->p = vAdd(pC->pB2->p, vMult(pC->normal, linMove2));
+  pC->pB1->p = vAdd(pC->pB1->p, vMult(pC->normal, -linMove1));
+  pC->pB2->p = vAdd(pC->pB2->p, vMult(pC->normal, -linMove2));
   //applying angular movements
   Vector impulsePerMove = m33vMult(pC->pB1->iit, vectorProd(localP1, pC->normal));
   Vector rotation = vMult(impulsePerMove, -angMove1 / angInertia1);
