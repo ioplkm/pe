@@ -164,8 +164,8 @@ int BoxBoxCollision(CollisionBox *pB1, CollisionBox *pB2, Collision *pC) {
     if (scalarProd(axis, vSub(pB2->pRB->p, pB1->pRB->p)) > 0) axis = vInv(axis);
 
     Vector ptOnEdge1 = pB1->halfSize;
-    if (oneAxisIndex == 0) ptOnEdge1.x = 0;
 
+    if (oneAxisIndex == 0) ptOnEdge1.x = 0;
     else if (scalarProd(b1x, axis) > 0) ptOnEdge1.x = -ptOnEdge1.x;
     if (oneAxisIndex == 1) ptOnEdge1.y = 0;
     else if (scalarProd(b1y, axis) > 0) ptOnEdge1.y = -ptOnEdge1.y;

@@ -124,6 +124,7 @@ int collision(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Collision *pC) {
     pen = penetrationOnAxis(pP1, pP2, vNorm(axes[i]));
     if (pen < minPen) minPen = pen;
   }
+  if (minPen < 0) return 0;
   //creating contacts
   int contacts = 0;
   Vector p1p2 = vSub(pP2->pRB->p, pP1->pRB->p);
@@ -140,6 +141,7 @@ int collision(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Collision *pC) {
       pC->r = 0;
       pC->pB1 = pP1->pRB;
       pC++->pB2 = pP2->pRB;
+      //return 1;
       contacts++;
     }
   }
@@ -157,6 +159,7 @@ int collision(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Collision *pC) {
       pC->r = 0;
       pC->pB1 = pP1->pRB;
       pC++->pB2 = pP2->pRB;
+      //return 1;
       contacts++;
     }
   }
@@ -205,12 +208,17 @@ int collision(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Collision *pC) {
       double b = (sm1 * edge2p - spe * edge1p) / denom;
       Vector p = vAdd(vMult(vAdd(p1w, vMult(e1, a)), 0.5),
                       vMult(vAdd(p2w, vMult(e2, b)), 0.5));
+      /*printV(e1);
+      printV(e2);
+      printV(p1);
+      printV(p2);*/
       pC->p = p;
       pC->normal = vNorm(axes[i]);
       pC->penetration = pen;
       pC->r = 0;
       pC->pB1 = pP1->pRB;
       pC++->pB2 = pP2->pRB;
+      //return 1;
       contacts++;
   }
   return contacts;
