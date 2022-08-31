@@ -29,7 +29,7 @@ double penetrationOnAxis(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Vector axis
   return ((max1 < max2 ? max1 : max2) - (min1 > min2 ? min1 : min2)); 
 }
 
-int minVerticesOnAxis(ConvexPolyhedra *pP, Vector axis, Vector *pVertices) {
+int minVerticesOnAxis(ConvexPolyhedra *pP, Vector axis, Vector *sum) {
   Vector p[8];//convex polyhedra vertices in world coordinates
   for (int i = 0; i < 8; i++) {
     p[i].x = i & 4 ? pP->halfSize.x : -pP->halfSize.x;
@@ -41,18 +41,21 @@ int minVerticesOnAxis(ConvexPolyhedra *pP, Vector axis, Vector *pVertices) {
   double min = DBL_MAX;
   for (int i = 0; i < 8; i++) {
     double n = scalarProd(axis, p[i]);
-    if (n < min) {
-      min = n;
-    }
+    if (n < min) min = n;
   }
   //finding all vetrices with minimal penetration
   int c = 0;
+  Vector sumP = (Vector){0, 0, 0};
   for (int i = 0; i < 8; i++) {
     if (scalarProd(axis, p[i]) == min) {
-      pVertices[c++] = p[i];
+      sumP = vAdd(sumP, p[i]);
+      c++;
     }
   }
-  return c--;
+  sum->x = sumP.x;
+  sum->y = sumP.y;
+  sum->z = sumP.z;
+  return c;
 }
 ////
 double tr(double a, double t) {
@@ -87,34 +90,27 @@ int collision(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Collision *pC) {
     pen = penetrationOnAxis(pP1, pP2, vNorm(axes[i]));
     if (pen < minPen) minPen = pen;
   }
+  if (minPen < 0) return 0;
   Vector sumP = (Vector){0, 0, 0};
   Vector normal;
-  if (minPen < 0) return 0;
   //creating contacts
   int contacts = 0;
   Vector p1p2 = vSub(pP2->pRB->p, pP1->pRB->p);
   for (int i = 0; i < 6; i++) {
     pen = penetrationOnAxis(pP1, pP2, vNorm(axes[i]));
     if (pen != minPen || scalarProd(axes[i], p1p2) <= 0) continue;
-      normal = axes[i];
-    Vector vertices[4];
-    int contactsOnAxis = minVerticesOnAxis(pP2, axes[i], vertices);
-    for (int j = 0; j < contactsOnAxis; j++) {
-      sumP = vAdd(sumP, vertices[j]);
-      contacts++;
-    }
+    normal = axes[i];
+    Vector toSumP;
+    contacts += minVerticesOnAxis(pP2, axes[i], &toSumP);
+    sumP = vAdd(sumP, toSumP);
   }
-  Vector p2p1 = vInv(p1p2);
   for (int i = 6; i < 12; i++) {
     pen = penetrationOnAxis(pP1, pP2, vNorm(axes[i]));
-    if (pen != minPen || scalarProd(axes[i], p2p1) <= 0) continue;
-      normal = axes[i];
-    Vector vertices[4];
-    int contactsOnAxis = minVerticesOnAxis(pP1, axes[i], vertices);
-    for (int j = 0; j < contactsOnAxis; j++) {
-      sumP = vAdd(sumP, vertices[j]);
-      contacts++;
-    }
+    if (pen != minPen || scalarProd(axes[i], p1p2) >= 0) continue;
+    normal = axes[i];
+    Vector toSumP;
+    contacts += minVerticesOnAxis(pP1, axes[i], &toSumP);
+    sumP = vAdd(sumP, toSumP);
   }
   Vector edgeP1[12];
   Vector edgeP2[12];
