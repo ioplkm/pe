@@ -59,12 +59,12 @@ void resolveInterpenetration(Collision *pC) {
   angInertia = vectorProd(angInertia, localP2);
   double angInertia2 = scalarProd(angInertia, pC->normal);
   double iInertia = 1 / (pC->pB1->inverseMass + pC->pB2->inverseMass + angInertia1 + angInertia2);
-  //double iInertia = 1 / (pC->pB1->inverseMass + angInertia1);
   //calculating linear and angular movements
   double linMove1 = pC->penetration * pC->pB1->inverseMass * iInertia;
   double angMove1 = pC->penetration * angInertia1 * iInertia;
-  //double limit1 = 0.2 * vLength(localP1);
-  double limit1 = 0.2 * vLength(vAdd(localP1, vMult(pC->normal, scalarProd(vInv(localP1), pC->normal))));
+  double limit1 = 0.0001;
+  //double limit1 = 0.01 * vLength(localP1);
+  //double limit1 = 0.2 * vLength(vAdd(localP1, vMult(pC->normal, scalarProd(vInv(localP1), pC->normal))));
   if (fabs(angMove1) > limit1) {
     printf("oops1\n");
     double totalMove1 = angMove1 + linMove1;
@@ -73,8 +73,9 @@ void resolveInterpenetration(Collision *pC) {
   }
   double linMove2 = -pC->penetration * pC->pB2->inverseMass * iInertia;
   double angMove2 = -pC->penetration * angInertia2 * iInertia;
-  //double limit2 = 0.2 * vLength(localP2);
-  double limit2 = 0.2 * vLength(vAdd(localP2, vMult(pC->normal, scalarProd(vInv(localP2), pC->normal))));
+  double limit2 = 0.0001;
+  //double limit2 = 0.01 * vLength(localP2);
+  //double limit2 = 0.2 * vLength(vAdd(localP2, vMult(pC->normal, scalarProd(vInv(localP2), pC->normal))));
   if (fabs(angMove2) > limit2) {
     printf("oops2\n");
     double totalMove2 = angMove2 + linMove2;
