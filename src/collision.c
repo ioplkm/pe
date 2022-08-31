@@ -57,12 +57,7 @@ int minVerticesOnAxis(ConvexPolyhedra *pP, Vector axis, Vector *sum) {
   sum->z = sumP.z;
   return c;
 }
-////
-double tr(double a, double t) {
-  if (fabs(a) > t) return a < 0 ? -t : t;
-  return a;
-}
-////
+
 int collision(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Collision *pC) {
   Vector norm1[6]; //normals of p1
   Vector norm2[6]; //normals of p2
@@ -78,35 +73,38 @@ int collision(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Collision *pC) {
     norm1[i] = vInv(norm1[i-3]);
     norm2[i] = vInv(norm2[i-3]);
   }
-  Vector axes[156]; //axes to check in SAT
+  //finding axes to check in SAT
+  Vector axes[156];
   for (int i = 0; i < 6; i++) axes[i] = norm1[i];
   for (int i = 6; i < 12; i++) axes[i] = norm2[i-6];
   for (int i = 12; i < 156; i++) axes[i] = vectorProd(edge1[(i-12)/12], edge2[(i-12)%12]);
-  //finding minimal interpenetration
+  //finding axes with min penetration
+  double pens[156];
   double minPen = DBL_MAX;
-  double pen;
+  bool isMinPen[156];
   for (int i = 0; i < 156; i++) {
-    if (vIsZero(axes[i])) continue;
-    pen = penetrationOnAxis(pP1, pP2, vNorm(axes[i]));
-    if (pen < minPen) minPen = pen;
+    if (vIsZero(axes[i])) {pens[i] = DBL_MAX; continue;}
+    pens[i] = penetrationOnAxis(pP1, pP2, vNorm(axes[i]));
+    if (pens[i] < minPen) minPen = pens[i];
   }
   if (minPen < 0) return 0;
+  for (int i = 0; i < 156; i++) isMinPen[i] = pens[i] == minPen;
+  //creating contacts
   Vector sumP = (Vector){0, 0, 0};
   Vector normal;
-  //creating contacts
   int contacts = 0;
   Vector p1p2 = vSub(pP2->pRB->p, pP1->pRB->p);
   for (int i = 0; i < 6; i++) {
-    pen = penetrationOnAxis(pP1, pP2, vNorm(axes[i]));
-    if (pen != minPen || scalarProd(axes[i], p1p2) <= 0) continue;
+    if (!isMinPen[i]) continue;
+    if (scalarProd(axes[i], p1p2) <= 0) continue;
     normal = axes[i];
     Vector toSumP;
     contacts += minVerticesOnAxis(pP2, axes[i], &toSumP);
     sumP = vAdd(sumP, toSumP);
   }
   for (int i = 6; i < 12; i++) {
-    pen = penetrationOnAxis(pP1, pP2, vNorm(axes[i]));
-    if (pen != minPen || scalarProd(axes[i], p1p2) >= 0) continue;
+    if (!isMinPen[i]) continue; 
+    if (scalarProd(axes[i], p1p2) >= 0) continue;
     normal = axes[i];
     Vector toSumP;
     contacts += minVerticesOnAxis(pP1, axes[i], &toSumP);
@@ -133,65 +131,47 @@ int collision(ConvexPolyhedra *pP1, ConvexPolyhedra *pP2, Collision *pC) {
     edgeP2[i] = edgeP1[i];
   }
   double minDist = DBL_MAX;
+  double dist;
+  Vector p1, p2;
   Vector p1w, p2w;
   Vector p2p1w;
   double edge1p, edge2p;
+  Vector e1ps[156];
+  Vector e2ps[156];
   for (int i = 12; i < 156; i++) {
+    if (!isMinPen[i]) continue;
     Vector e1 = edge1[(i - 12) / 12];
     Vector e2 = edge2[(i - 12) % 12];
-    Vector p1 = edgeP1[(i - 12) / 12];
-    Vector p2 = edgeP2[(i - 12) % 12];
-      if (vIsZero(vectorProd(e1, e2))) continue;
-      pen = penetrationOnAxis(pP1, pP2, vNorm(axes[i]));
-      if (pen != minPen) continue;
-      p1w = m34vMult(pP1->pRB->transform, p1);
-      p2w = m34vMult(pP2->pRB->transform, p2);
-      p2p1w = vSub(p1w, p2w);
-      edge1p = scalarProd(e1, p2p1w);
-      edge2p = scalarProd(e2, p2p1w);
-      //don't know what is this
-      double sm1 = vLength2(e1);
-      double sm2 = vLength2(e2);
-      double spe = scalarProd(e1, e2);
-      double denom = sm1 * sm2 - spe * spe;
-      double a = (spe * edge2p - sm2 * edge1p) / denom;
-      double b = (sm1 * edge2p - spe * edge1p) / denom;
-      a = tr(a, 0.5);
-      b = tr(b, 0.5);
-      Vector e1p = vAdd(p1w, vMult(e1, a));
-      Vector e2p = vAdd(p2w, vMult(e2, b));
-      if (vDist(e1p, e2p) < minDist) minDist = vDist(e1p, e2p);
+    if (vIsZero(vectorProd(e1, e2))) continue;
+    p1 = edgeP1[(i - 12) / 12];
+    p2 = edgeP2[(i - 12) % 12];
+    p1w = m34vMult(pP1->pRB->transform, p1);
+    p2w = m34vMult(pP2->pRB->transform, p2);
+    p2p1w = vSub(p1w, p2w);
+    edge1p = scalarProd(e1, p2p1w);
+    edge2p = scalarProd(e2, p2p1w);
+    //don't know what is this
+    double sm1 = vLength2(e1);
+    double sm2 = vLength2(e2);
+    double spe = scalarProd(e1, e2);
+    double denom = sm1 * sm2 - spe * spe;
+    double a = (spe * edge2p - sm2 * edge1p) / denom;
+    double b = (sm1 * edge2p - spe * edge1p) / denom;
+    e1ps[i] = vAdd(p1w, vMult(e1, a));
+    e2ps[i] = vAdd(p2w, vMult(e2, b));
+    dist = vDist(e1ps[i], e2ps[i]);
+    if (dist < minDist) minDist = dist;
   }
   for (int i = 12; i < 156; i++) {
+    if (!isMinPen[i]) continue;
     Vector e1 = edge1[(i - 12) / 12];
     Vector e2 = edge2[(i - 12) % 12];
-    Vector p1 = edgeP1[(i - 12) / 12];
-    Vector p2 = edgeP2[(i - 12) % 12];
-      if (vIsZero(vectorProd(e1, e2))) continue;
-      pen = penetrationOnAxis(pP1, pP2, vNorm(axes[i]));
-      if (pen != minPen) continue;
-      p1w = m34vMult(pP1->pRB->transform, p1);
-      p2w = m34vMult(pP2->pRB->transform, p2);
-      p2p1w = vSub(p1w, p2w);
-      edge1p = scalarProd(e1, p2p1w);
-      edge2p = scalarProd(e2, p2p1w);
-      //don't know what is this
-      double sm1 = vLength2(e1);
-      double sm2 = vLength2(e2);
-      double spe = scalarProd(e1, e2);
-      double denom = sm1 * sm2 - spe * spe;
-      double a = (spe * edge2p - sm2 * edge1p) / denom;
-      double b = (sm1 * edge2p - spe * edge1p) / denom;
-      a = tr(a, 0.5);
-      b = tr(b, 0.5);
-      Vector e1p = vAdd(p1w, vMult(e1, a));
-      Vector e2p = vAdd(p2w, vMult(e2, b));
-      if (vDist(e1p, e2p) != minDist) continue;
-      Vector p = vAdd(vMult(vAdd(p1w, vMult(e1, a)), 0.5),
-                      vMult(vAdd(p2w, vMult(e2, b)), 0.5));
-      normal = vNorm(axes[i]);
-      sumP = vAdd(sumP, p);
-      contacts++;
+    if (vIsZero(vectorProd(e1, e2))) continue;
+    if (vDist(e1ps[i], e2ps[i]) != minDist) continue;
+    Vector p = vAdd(vMult(e1ps[i], 0.5), vMult(e2ps[i], 0.5));
+    normal = vNorm(axes[i]);
+    sumP = vAdd(sumP, p);
+    contacts++;
   }
   if (scalarProd(normal, p1p2) < 0) normal = vInv(normal);
   pC->p = vDiv(sumP, contacts);
